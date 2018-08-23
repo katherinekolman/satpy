@@ -97,19 +97,6 @@ class TestGenericImage(unittest.TestCase):
         scn['rgba'] = ds_rgba
         scn['rgba'].attrs['area'] = self.area_def
 
-        # Save the images.  Two images in PNG and two in GeoTIFF
-        scn.save_dataset('l', os.path.join(self.base_dir, 'test_l.png'),
-                         writer='simple_image')
-        scn.save_dataset('la', os.path.join(self.base_dir,
-                                            '20180101_0000_test_la.png'),
-                         writer='simple_image')
-        scn.save_dataset('rgb', os.path.join(self.base_dir,
-                                             '20180101_0000_test_rgb.tif'),
-                         writer='geotiff')
-        scn.save_dataset('rgba', os.path.join(self.base_dir,
-                                              'test_rgba.tif'),
-                         writer='geotiff')
-
         self.scn = scn
 
     def tearDown(self):
@@ -124,6 +111,8 @@ class TestGenericImage(unittest.TestCase):
         """Test reading PNG images via satpy.Scene()."""
         from satpy import Scene
 
+        self.scn.save_dataset('l', os.path.join(self.base_dir, 'test_l.png'),
+                              writer='simple_image')
         fname = os.path.join(self.base_dir, 'test_l.png')
         scn = Scene(reader='generic_image', filenames=[fname])
         scn.load(['image'])
@@ -132,6 +121,9 @@ class TestGenericImage(unittest.TestCase):
         self.assertEqual(scn.attrs['start_time'], None)
         self.assertEqual(scn.attrs['end_time'], None)
 
+        self.scn.save_dataset('la', os.path.join(self.base_dir,
+                                                 '20180101_0000_test_la.png'),
+                              writer='simple_image')
         fname = os.path.join(self.base_dir, '20180101_0000_test_la.png')
         scn = Scene(reader='generic_image', filenames=[fname])
         scn.load(['image'])
@@ -146,6 +138,9 @@ class TestGenericImage(unittest.TestCase):
         """Test reading PNG images via satpy.Scene()."""
         from satpy import Scene
 
+        self.scn.save_dataset('rgb', os.path.join(self.base_dir,
+                                                  '20180101_0000_test_rgb.tif'),
+                              writer='geotiff')
         fname = os.path.join(self.base_dir, '20180101_0000_test_rgb.tif')
         scn = Scene(reader='generic_image', filenames=[fname])
         scn.load(['image'])
@@ -155,6 +150,9 @@ class TestGenericImage(unittest.TestCase):
         self.assertEqual(scn.attrs['end_time'], self.date)
         self.assertEqual(scn['image'].area, self.area_def)
 
+        self.scn.save_dataset('rgba', os.path.join(self.base_dir,
+                                                   'test_rgba.tif'),
+                              writer='geotiff')
         fname = os.path.join(self.base_dir, 'test_rgba.tif')
         scn = Scene(reader='generic_image', filenames=[fname])
         scn.load(['image'])
@@ -169,6 +167,9 @@ class TestGenericImage(unittest.TestCase):
         from satpy.readers.generic_image import get_geotiff_area_def
         from satpy import CHUNK_SIZE
 
+        self.scn.save_dataset('rgb', os.path.join(self.base_dir,
+                                                  '20180101_0000_test_rgb.tif'),
+                              writer='geotiff')
         fname = os.path.join(self.base_dir, '20180101_0000_test_rgb.tif')
         data = xr.open_rasterio(fname,
                                 chunks=(1, CHUNK_SIZE, CHUNK_SIZE))
@@ -180,6 +181,9 @@ class TestGenericImage(unittest.TestCase):
         from satpy.readers.generic_image import GenericImageFileHandler
         from satpy.readers.generic_image import mask_image_data
 
+        self.scn.save_dataset('rgba', os.path.join(self.base_dir,
+                                                   'test_rgba.tif'),
+                              writer='geotiff')
         fname = os.path.join(self.base_dir, 'test_rgba.tif')
         fname_info = {'start_time': self.date}
         ftype_info = {}
