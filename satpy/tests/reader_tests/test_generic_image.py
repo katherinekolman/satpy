@@ -33,8 +33,7 @@ import numpy as np
 class TestGenericImage(unittest.TestCase):
     """Test generic image reader."""
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """Create temporary images to test on."""
         import tempfile
         from datetime import datetime
@@ -42,83 +41,82 @@ class TestGenericImage(unittest.TestCase):
         from pyresample.geometry import AreaDefinition
         from satpy.scene import Scene
 
-        cls.date = datetime(2018, 1, 1)
+        self.date = datetime(2018, 1, 1)
 
         # Create area definition
         pcs_id = 'ETRS89 / LAEA Europe'
         proj4_dict = {'init': 'epsg:3035'}
-        cls.x_size = 100
-        cls.y_size = 100
+        self.x_size = 100
+        self.y_size = 100
         area_extent = (2426378.0132, 1528101.2618, 6293974.6215, 5446513.5222)
-        cls.area_def = AreaDefinition('geotiff_area', pcs_id, pcs_id,
-                                      proj4_dict, cls.x_size, cls.y_size,
-                                      area_extent)
+        self.area_def = AreaDefinition('geotiff_area', pcs_id, pcs_id,
+                                       proj4_dict, self.x_size, self.y_size,
+                                       area_extent)
 
         # Create datasets for L, LA, RGB and RGBA mode images
-        r__ = da.random.randint(0, 256, size=(cls.y_size, cls.x_size),
+        r__ = da.random.randint(0, 256, size=(self.y_size, self.x_size),
                                 chunks=(50, 50))
-        g__ = da.random.randint(0, 256, size=(cls.y_size, cls.x_size),
+        g__ = da.random.randint(0, 256, size=(self.y_size, self.x_size),
                                 chunks=(50, 50))
-        b__ = da.random.randint(0, 256, size=(cls.y_size, cls.x_size),
+        b__ = da.random.randint(0, 256, size=(self.y_size, self.x_size),
                                 chunks=(50, 50))
-        a__ = 255 * np.ones((cls.y_size, cls.x_size))
+        a__ = 255 * np.ones((self.y_size, self.x_size))
         a__[:10, :10] = 0
         a__ = da.from_array(a__, chunks=(50, 50))
 
         ds_l = xr.DataArray(da.stack([r__]), dims=('bands', 'y', 'x'),
                             attrs={'name': 'test_l',
-                                   'start_time': cls.date})
+                                   'start_time': self.date})
         ds_l['bands'] = ['L']
         ds_la = xr.DataArray(da.stack([r__, a__]), dims=('bands', 'y', 'x'),
                              attrs={'name': 'test_la',
-                                    'start_time': cls.date})
+                                    'start_time': self.date})
         ds_la['bands'] = ['L', 'A']
         ds_rgb = xr.DataArray(da.stack([r__, g__, b__]),
                               dims=('bands', 'y', 'x'),
                               attrs={'name': 'test_rgb',
-                                     'start_time': cls.date})
+                                     'start_time': self.date})
         ds_rgb['bands'] = ['R', 'G', 'B']
         ds_rgba = xr.DataArray(da.stack([r__, g__, b__, a__]),
                                dims=('bands', 'y', 'x'),
                                attrs={'name': 'test_rgba',
-                                      'start_time': cls.date})
+                                      'start_time': self.date})
         ds_rgba['bands'] = ['R', 'G', 'B', 'A']
 
         # Temp dir for the saved images
-        cls.base_dir = tempfile.mkdtemp()
+        self.base_dir = tempfile.mkdtemp()
 
         # Put the datasets to Scene for easy saving
         scn = Scene()
         scn['l'] = ds_l
-        scn['l'].attrs['area'] = cls.area_def
+        scn['l'].attrs['area'] = self.area_def
         scn['la'] = ds_la
-        scn['la'].attrs['area'] = cls.area_def
+        scn['la'].attrs['area'] = self.area_def
         scn['rgb'] = ds_rgb
-        scn['rgb'].attrs['area'] = cls.area_def
+        scn['rgb'].attrs['area'] = self.area_def
         scn['rgba'] = ds_rgba
-        scn['rgba'].attrs['area'] = cls.area_def
+        scn['rgba'].attrs['area'] = self.area_def
 
         # Save the images.  Two images in PNG and two in GeoTIFF
-        scn.save_dataset('l', os.path.join(cls.base_dir, 'test_l.png'),
+        scn.save_dataset('l', os.path.join(self.base_dir, 'test_l.png'),
                          writer='simple_image')
-        scn.save_dataset('la', os.path.join(cls.base_dir,
+        scn.save_dataset('la', os.path.join(self.base_dir,
                                             '20180101_0000_test_la.png'),
                          writer='simple_image')
-        scn.save_dataset('rgb', os.path.join(cls.base_dir,
+        scn.save_dataset('rgb', os.path.join(self.base_dir,
                                              '20180101_0000_test_rgb.tif'),
                          writer='geotiff')
-        scn.save_dataset('rgba', os.path.join(cls.base_dir,
+        scn.save_dataset('rgba', os.path.join(self.base_dir,
                                               'test_rgba.tif'),
                          writer='geotiff')
 
-        cls.scn = scn
+        self.scn = scn
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         """Remove the temporary directory created for a test"""
         try:
             import shutil
-            shutil.rmtree(cls.base_dir, ignore_errors=True)
+            shutil.rmtree(self.base_dir, ignore_errors=True)
         except OSError:
             pass
 
